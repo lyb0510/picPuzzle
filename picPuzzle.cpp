@@ -77,7 +77,6 @@ void fin() {
 			err++;
 		}
 	}
-	printf("\n");
 	if (err == 0) {
 		showObject(p[15]);
 		clear();
