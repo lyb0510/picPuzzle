@@ -1,10 +1,8 @@
-#include <Bangtal.h>
+﻿#include <Bangtal.h>
 #include <stdio.h>
 #include <iostream>
 #include <conio.h>
 #include <time.h>
-
-//https://github.com/lyb0510/picPuzzle
 
 #pragma comment(lib,"Bangtal.lib")
 
