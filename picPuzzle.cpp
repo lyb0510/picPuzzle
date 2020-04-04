@@ -1,13 +1,17 @@
-﻿#include <Bangtal.h>
+#include <Bangtal.h>
 #include <stdio.h>
 #include <iostream>
+#include <conio.h>
 #include <time.h>
+
+//https://github.com/lyb0510/picPuzzle
 
 #pragma comment(lib,"Bangtal.lib")
 
 SceneID scene1;
-ObjectID startButton, base;
+ObjectID startButton, restartButton, endButton, base;
 ObjectID p[16];
+
 int X[4] = {300, 450, 600, 750};
 int Y[4] = {470, 320, 170, 20};
 char filename[20];
@@ -15,6 +19,29 @@ char filename[20];
 int p_location[16];
 int blank = 15;
 int err = 0;
+
+char timerBuffer[50];
+
+void secToHHMMSS(int secs, char* s, size_t size) {
+	int hour, min, sec;
+
+	sec = secs % 60;
+	min = secs / 60 % 60;
+	hour = secs / 3600;
+
+	sprintf_s(s, size, "경과 시간은 [%02d:%02d:%02d] 입니다.", hour, min, sec);
+}
+
+void stopwatch(int onOff) {
+	static int oldTime;
+	if (onOff == 1) {
+		oldTime = (int)time(NULL);
+	}
+	if (onOff == 0) {
+		secToHHMMSS( (int)time(NULL) - oldTime, timerBuffer, sizeof(timerBuffer)	);
+	}
+
+}
 
 void suffle() {
 	srand(time(NULL));
@@ -57,6 +84,7 @@ void startgame() {
 	hideObject(p[15]);
 	hideObject(startButton);
 	showObject(base);
+	stopwatch(1);
 	return;
 }
 
@@ -66,6 +94,7 @@ void clear() {
 			hideObject(p[4*i+j]);
 		}
 	}
+	hideObject(restartButton);
 	hideObject(base);
 	showObject(startButton);
 }
@@ -79,6 +108,8 @@ void fin() {
 	}
 	if (err == 0) {
 		showObject(p[15]);
+		stopwatch(0);
+		showMessage(timerBuffer);
 		clear();
 	}
 	return;
@@ -90,18 +121,18 @@ void click_p(int i) {
 	x = i % 4;
 	y = i / 4;
 	if ((blank - i == 4) || (blank - i == -4) || (((blank - i == 1) && (i % 4 != 3))) || ((blank - i == -1) && (i % 4 != 0))) {
-		sprintf_s(filename, "Images\\%d.png", p_location[i]);
-		setObjectImage(p[blank], filename);
-		showObject(p[blank]);
-
-		sprintf_s(filename, "Images\\%d.png", p_location[blank]);
-		setObjectImage(p[i], filename);
-		hideObject(p[i]);
-
 		temp = p_location[blank];
 		p_location[blank] = p_location[i];
 		p_location[i] = temp;
 
+
+		sprintf_s(filename, "Images\\%d.png", p_location[blank]);
+		setObjectImage(p[blank], filename);
+		showObject(p[blank]);
+
+		sprintf_s(filename, "Images\\%d.png", p_location[i]);
+		setObjectImage(p[i], filename);
+		hideObject(p[i]);	
 		blank = i;
 	}
 	return;
@@ -111,7 +142,15 @@ void mouseCallback(ObjectID object, int x, int y, MouseAction action) {
 	if (object == startButton) {
 		hideObject(startButton);
 		showObject(base);
+		showObject(restartButton);
 		startgame();
+	}
+	else if (object == restartButton) {
+		stopwatch(0);
+		clear();
+	}
+	else if (object == endButton) {
+		endGame();
 	}
 	for (int i = 0; i < 16; i++) {
 		if (object == p[i]) {
@@ -132,6 +171,15 @@ int main(){
 	locateObject(startButton, scene1, 590, 460);
 	scaleObject(startButton, 1.4f);
 	showObject(startButton);
+
+	endButton = createObject("종료버튼", "Images\\end.png");
+	locateObject(endButton, scene1, 150, 50);
+	scaleObject(endButton, 1.4f);
+	showObject(endButton);
+
+	restartButton = createObject("재시작버튼", "Images\\restart.png");
+	locateObject(restartButton, scene1, 150,100);
+	scaleObject(restartButton, 1.4f);
 
 	startGame(scene1);
 }
